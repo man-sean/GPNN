@@ -64,6 +64,7 @@ class gpnn:
         # out_file
         filename = os.path.splitext(os.path.basename(img_path))[0]
         self.out_file = os.path.join(config['out_dir'], "%s_%s.png" % (filename, config['task']))
+        rename_existing(self.out_file)
 
         # coarse settings
         if config['task'] == 'random_sample':
