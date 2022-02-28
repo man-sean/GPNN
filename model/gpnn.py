@@ -1,3 +1,4 @@
+import tqdm
 import torch
 import numpy as np
 
@@ -86,29 +87,35 @@ class gpnn:
                 self.mask_pyramid[i] = mask
 
     def run(self, to_save=True):
-        for i in reversed(range(len(self.x_pyramid))):
-            if i == len(self.x_pyramid) - 1:
-                queries = self.coarse_img
-                keys = self.x_pyramid[i]
-            else:
-                queries = resize(self.y_pyramid[i + 1], self.x_pyramid[i].shape)
-                keys = resize(self.x_pyramid[i + 1], self.x_pyramid[i].shape)
-            new_keys = True
-            for j in range(self.T):
-                if self.is_faiss:
-                    self.y_pyramid[i] = self.PNN_faiss(self.x_pyramid[i], keys, queries, self.PATCH_SIZE, self.STRIDE,
-                                                       self.ALPHA, mask=None, new_keys=new_keys)
+        with tqdm.tqdm(total=len(self.x_pyramid),
+                       desc='Generating',
+                       colour='#B4CFB0',
+                       bar_format=f'{{l_bar}}{{bar:{len(self.x_pyramid)}}}{{r_bar}}{{bar:-{len(self.x_pyramid)}b}}',
+                       ) as pbar:
+            for i in reversed(range(len(self.x_pyramid))):
+                if i == len(self.x_pyramid) - 1:
+                    queries = self.coarse_img
+                    keys = self.x_pyramid[i]
                 else:
-                    self.y_pyramid[i] = self.PNN(self.x_pyramid[i], keys, queries, self.PATCH_SIZE, self.STRIDE,
-                                                 self.ALPHA)
-                queries = self.y_pyramid[i]
-                keys = self.x_pyramid[i]
-                if j > 1:
-                    new_keys = False
+                    queries = resize(self.y_pyramid[i + 1], self.x_pyramid[i].shape)
+                    keys = resize(self.x_pyramid[i + 1], self.x_pyramid[i].shape)
+                new_keys = True
+                for j in range(self.T):
+                    if self.is_faiss:
+                        self.y_pyramid[i] = self.PNN_faiss(self.x_pyramid[i], keys, queries, self.PATCH_SIZE, self.STRIDE,
+                                                           self.ALPHA, mask=None, new_keys=new_keys)
+                    else:
+                        self.y_pyramid[i] = self.PNN(self.x_pyramid[i], keys, queries, self.PATCH_SIZE, self.STRIDE,
+                                                     self.ALPHA)
+                    queries = self.y_pyramid[i]
+                    keys = self.x_pyramid[i]
+                    if j > 1:
+                        new_keys = False
+                pbar.update()
         if to_save:
-            img_save(self.y_pyramid[0], self.out_file)
-        else:
-            return self.y_pyramid[0]
+                img_save(self.y_pyramid[0], self.out_file)
+            else:
+                return self.y_pyramid[0]
 
     def PNN(self, x, x_scaled, y_scaled, patch_size, stride, alpha, mask=None):
         queries = extract_patches(y_scaled, patch_size, stride)
