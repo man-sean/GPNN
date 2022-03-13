@@ -2,3 +2,7 @@ imageio
 numpy
 scikit-image
 torch
+gif
+matplotlib
+scikit-learn
+tqdm

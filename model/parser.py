@@ -7,6 +7,7 @@ def parser_general(parser):
 	parser.add_argument('--iters', type=int, default=10, required=False, help='number of refinement iterations in each pyramid scale. default is 10 (int)')
 	parser.add_argument('--pyramid_ratio', type=float, default=4 / 3, required=False, help='the ratio between pyramid scales. default is 4/3 (float)')
 	parser.add_argument('--faiss', action='store_true', default=False, help='indicate to use faiss approximate nearest-neighbor. default is False (boolean)')
+	parser.add_argument('--sklearn', action='store_true', default=False, help='indicate to use sklearn approximate nearest-neighbor. default is False (boolean)')
 	parser.add_argument('--no_cuda', action='store_true', default=False, help='indicate to run only on cpu. default is False (boolean)')
 	return parser
 
@@ -32,4 +33,12 @@ def parser_inpainting(parser):
 	parser.add_argument('-m', '--mask', type=str, required=True, help='path of an image with ones where the inpainting is in the input image and zeroes elsewhere')
 	parser.add_argument('--alpha', type=float, default=1, required=False, help='alpha parameter of the normalizing distance matrix. small alpha encourages completeness. default is 1.0 (float)')
 	parser.add_argument('--task', type=str, default='inpainting')
+	return parser
+
+def parser_sketch(parser):
+	parser.add_argument('-in', '--input_img', type=str, required=True, help='path of input image')
+	parser.add_argument('--ref-img', type=str, required=True, help='path of sketch image')
+	parser.add_argument('--alpha', type=float, default=1.0, required=False, help='alpha parameter of the normalizing distance matrix. alpha << 1 encourages completeness. default is 1.0 (float)')
+	parser.add_argument('--beta', type=float, default=2.0, required=False, help='beta parameter of the mixing coefficient. default is 1.0 (float)')
+	parser.add_argument('--task', type=str, default='sketch')
 	return parser
