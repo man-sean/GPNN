@@ -1,4 +1,4 @@
-./.idea
-./output
+.idea
+output
 *.pyc
 .DS_Store
